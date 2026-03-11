@@ -1,0 +1,6 @@
+@JWTAspNet_HostAddress = http://localhost:5217
+
+GET {{JWTAspNet_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
