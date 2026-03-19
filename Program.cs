@@ -1,4 +1,5 @@
 using JWTAspNet.Data;
+using JWTAspNet.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -12,9 +13,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
+//dependency injection service
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+
 
 var app = builder.Build();
 

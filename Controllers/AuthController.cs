@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using JWTAspNet.DTO;
 using JWTAspNet.Entities;
+using JWTAspNet.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,66 +16,43 @@ namespace JWTAspNet.Controllers
     public class AuthController : ControllerBase
     {
 
-        private readonly IConfiguration _configuration;
+        private readonly IAuthService _authService;
 
-        public AuthController(IConfiguration configuration)
+        public AuthController(IAuthService authService)
         {
-            _configuration = configuration;
+            _authService = authService;
         }
 
-        public static User user = new();
 
         [HttpPost("register")]
-        public ActionResult<User> Register(UserDto request)
+        public async Task<ActionResult<User>> Register(UserDto request)
         {
-            var hashedPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
 
-            user.Username = request.Username; ;
-            user.Password = hashedPassword;
+            var user = await _authService.RegisterASync(request);
+
+            if(user is null)
+            {
+                return BadRequest("User already exists");
+            }
 
             return Ok(user);
         }
 
         [HttpPost("login")]
-        public ActionResult<string> Login(UserDto request)
+        public async Task<ActionResult<string>> Login(UserDto request)
         {
 
-            if (user.Username != request.Username)
-            {
-                return BadRequest("User not found.");
-            }
+            var token = await _authService.LoginAsync(request);
 
-            if (new PasswordHasher<User>().VerifyHashedPassword(user, user.Password, request.Password) == PasswordVerificationResult.Failed)
+            if(token is null)
             {
-                return BadRequest("Wrong password.");
-            }
-
-            string token = CreateToken(user);
+                return BadRequest("Username or password is incorrect");
+            }   
 
             return Ok(token);
         }
 
-        private string CreateToken(User user)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.Username)
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetValue<string>("AppSettings:Token")!));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
-
-            var tokenDescriptor = new JwtSecurityToken(
-                    issuer: _configuration.GetValue<string>("AppSettings:Issuer"),
-                    audience: _configuration.GetValue<string>("AppSettings:Audience"),
-                    claims: claims,
-                    expires: DateTime.UtcNow.AddDays(1),
-                    signingCredentials: creds
-                );
-
-            return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
-        }
+       
 
     }
 }
