@@ -4,6 +4,7 @@ using System.Text;
 using JWTAspNet.DTO;
 using JWTAspNet.Entities;
 using JWTAspNet.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -52,7 +53,19 @@ namespace JWTAspNet.Controllers
             return Ok(token);
         }
 
-       
+        [Authorize]
+        [HttpGet]
+       public IActionResult AthenticatedOnlyEndpoint()
+        {
+            return Ok("Authenticated user");
+        }
 
+
+        [Authorize(Roles = nameof(UserRole.Admin))]
+        [HttpGet("authenticated/admin")]
+        public IActionResult AuthenticatedOnlyEndpointAdmin()
+        {
+            return Ok("Authenticated Admin");
+        }
     }
 }

@@ -12,6 +12,13 @@ namespace JWTAspNet.Entities
 
         public string Password { get; set; } = string.Empty;
 
+        public UserRole Role { get; set; }
 
     }
+
+    public enum UserRole
+    {
+        Admin = 1,
+        User = 2 
+    }   
 }
