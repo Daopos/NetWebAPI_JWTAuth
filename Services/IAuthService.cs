@@ -8,7 +8,8 @@ namespace JWTAspNet.Services
 
         Task<User?> RegisterASync(UserDto request);
 
-        Task<string?> LoginAsync(UserDto request);
+        Task<TokenResponseDto?> LoginAsync(UserDto request);
 
+        Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);
     }
 }

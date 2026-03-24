@@ -31,7 +31,7 @@ namespace JWTAspNet.Controllers
 
             var user = await _authService.RegisterASync(request);
 
-            if(user is null)
+            if (user is null)
             {
                 return BadRequest("User already exists");
             }
@@ -40,22 +40,22 @@ namespace JWTAspNet.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(UserDto request)
+        public async Task<ActionResult<TokenResponseDto>> Login(UserDto request)
         {
 
             var token = await _authService.LoginAsync(request);
 
-            if(token is null)
+            if (token is null)
             {
                 return BadRequest("Username or password is incorrect");
-            }   
+            }
 
             return Ok(token);
         }
 
         [Authorize]
         [HttpGet]
-       public IActionResult AthenticatedOnlyEndpoint()
+        public IActionResult AthenticatedOnlyEndpoint()
         {
             return Ok("Authenticated user");
         }
@@ -66,6 +66,17 @@ namespace JWTAspNet.Controllers
         public IActionResult AuthenticatedOnlyEndpointAdmin()
         {
             return Ok("Authenticated Admin");
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<TokenResponseDto>> RefreshTokem(RefreshTokenRequestDto refreshTokenRequestDto)
+        {
+            var tokenResponse = await _authService.RefreshTokenAsync(refreshTokenRequestDto);
+            if (tokenResponse is null || tokenResponse.AccessToken is null || tokenResponse.RefreshToken is null)
+            {
+                return BadRequest("Invalid refresh token");
+            }
+            return Ok(tokenResponse);
         }
     }
 }
